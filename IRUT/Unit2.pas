@@ -20,6 +20,7 @@ type
     ProgressBar1: TProgressBar;
     Label6: TLabel;
     procedure Button1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -115,6 +116,11 @@ else
 
 
 
+end;
+
+procedure TForm2.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+form1.Enabled:=true;
 end;
 
 end.

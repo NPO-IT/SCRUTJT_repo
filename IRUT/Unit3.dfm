@@ -1,7 +1,7 @@
 object Form3: TForm3
   Left = 774
   Top = 252
-  BorderStyle = bsNone
+  BorderStyle = bsDialog
   Caption = #1042#1088#1077#1084#1077#1085#1085#1086#1081' '#1080#1085#1090#1077#1088#1074#1072#1083
   ClientHeight = 492
   ClientWidth = 483
@@ -12,6 +12,7 @@ object Form3: TForm3
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel

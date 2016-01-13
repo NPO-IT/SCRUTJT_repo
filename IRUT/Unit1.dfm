@@ -1,8 +1,8 @@
 object Form1: TForm1
-  Left = 211
-  Top = 112
-  Width = 1603
-  Height = 877
+  Left = 208
+  Top = 143
+  Width = 1549
+  Height = 879
   Caption = #1057#1050#1056#1059#1058#1046#1058
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,13 +18,13 @@ object Form1: TForm1
   object Image1: TImage
     Left = -24
     Top = 512
-    Width = 1617
+    Width = 1553
     Height = 265
   end
   object Splitter1: TSplitter
     Left = 0
     Top = 0
-    Height = 777
+    Height = 841
   end
   object Panel1: TPanel
     Left = 0
@@ -303,25 +303,24 @@ object Form1: TForm1
   object GroupBox1: TGroupBox
     Left = 1128
     Top = 0
-    Width = 465
+    Width = 401
     Height = 513
     Caption = #1048#1085#1092#1086' '#1088#1072#1079#1073#1080#1088#1072#1077#1084#1086#1075#1086' '#1089#1083#1086#1074#1072
     TabOrder = 3
     object Memo1: TMemo
       Left = 8
       Top = 16
-      Width = 641
+      Width = 385
       Height = 481
       ScrollBars = ssBoth
       TabOrder = 0
     end
   end
   object Panel2: TPanel
-    Left = 0
-    Top = 777
-    Width = 1595
-    Height = 73
-    Align = alBottom
+    Left = 3
+    Top = 776
+    Width = 1526
+    Height = 63
     TabOrder = 4
     object Label6: TLabel
       Left = 504
@@ -339,7 +338,7 @@ object Form1: TForm1
     object TrackBar1: TTrackBar
       Left = 8
       Top = 40
-      Width = 1577
+      Width = 1505
       Height = 20
       Max = 100000
       PageSize = 1

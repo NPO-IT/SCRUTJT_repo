@@ -1,17 +1,19 @@
 object Form2: TForm2
   Left = 539
   Top = 378
-  BorderStyle = bsNone
+  BorderStyle = bsDialog
   Caption = #1042#1088#1077#1084#1077#1085#1085#1086#1081' '#1080#1085#1090#1077#1088#1074#1072#1083' '
   ClientHeight = 347
   ClientWidth = 490
   Color = clBtnFace
+  DefaultMonitor = dmPrimary
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel

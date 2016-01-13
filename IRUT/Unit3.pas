@@ -39,12 +39,12 @@ uses Unit1, Unit2;
 function TestStrUnInt(str:string;var unInt:string):boolean;
 var
 i:integer;
-j:integer;
+//j:integer;
 ss:string;
 
 begin
 i:=1;
-j:=1;
+//j:=1;
 ss:='';
 while i<=length(str) do
   begin
@@ -97,15 +97,6 @@ if ((TestStr(form3.MaskEdit1.Text))and(TestStr(form3.MaskEdit2.Text)))then
                           recordInfoMas[0].fileOffset,beginInterval,endInterval,
                             strToInt(unInterval));
                         ShowMessage('Файл записан!');
-
-                        //очищаем графики. для красоты
-                        form1.Chart1.Series[0].Clear;
-                        form1.Chart2.Series[0].Clear;
-                        //очищаем прогресс бар для повторного использования
-                        form3.ProgressBar1.Position:=0;
-                        //открываем тот файл на котором зак. разбор
-                        openFileForIndex(fileIndex);
-                        form1.Enabled:=true;
                         form3.Close;
                         //form1.Show;
                       end

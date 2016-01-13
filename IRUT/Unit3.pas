@@ -22,6 +22,7 @@ type
     Label7: TLabel;
     MaskEdit3: TMaskEdit;
     procedure Button2Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -153,6 +154,15 @@ else
     showMessage('Поля интервалов не заполнены!');
   end;
 
+end;
+
+procedure TForm3.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+form1.Chart1.Series[0].Clear;
+form1.Chart2.Series[0].Clear;
+form3.ProgressBar1.Position:=0;
+openFileForIndex(fileIndex);
+form1.Enabled:=true;
 end;
 
 end.

@@ -77,14 +77,6 @@ if ((TestStr(form2.MaskEdit1.Text))and(TestStr(form2.MaskEdit2.Text)))then
                   recordInfoMas[0].fileOffset,beginInterval,endInterval);
                 ShowMessage('Файл записан!');
 
-                //очищаем графики. для красоты
-                form1.Chart1.Series[0].Clear;
-                form1.Chart2.Series[0].Clear;
-                //очищаем прогресс бар для повторного использования
-                form2.ProgressBar1.Position:=0;
-                //открываем тот файл на котором зак. разбор
-                openFileForIndex(fileIndex);
-                form1.Enabled:=true;
                 form2.Close;
                 //form1.Show;
               end
@@ -120,6 +112,10 @@ end;
 
 procedure TForm2.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+form1.Chart1.Series[0].Clear;
+form1.Chart2.Series[0].Clear;
+form2.ProgressBar1.Position:=0;
+openFileForIndex(fileIndex);
 form1.Enabled:=true;
 end;
 

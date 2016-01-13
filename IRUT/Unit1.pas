@@ -1479,7 +1479,7 @@ deltaInFileForBack:=stream.Position;
 stream.Free;
 //form1.Hide;
 form1.Enabled:=false;
-form2.ShowModal;
+form2.Show;
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
@@ -1496,7 +1496,7 @@ deltaInFileForBack:=stream.Position;
 stream.Free;
 //form1.Hide;
 form1.Enabled:=false;
-form3.ShowModal;
+form3.Show;
 end;
 
 end.

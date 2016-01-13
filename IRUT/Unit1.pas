@@ -156,7 +156,7 @@ end;
 //Процедуры отвечающие за вывод в файл
 //==============================================================================
 
-//процедура для записи в файл логов проверки УЦФ
+//процедура для записи в файл логов 
 procedure SaveResultToFile(var outF:text;str:string);
 begin
 Writeln(outF,str);
@@ -447,6 +447,7 @@ while i<=numberOfPocket do
 
       iByte:=3;
       //Вывод быстрых параметров на Диаграмму и вывод на график
+      //1-20 быстрых по 1 байту
       OutToDiaAndGist(iByte);
 
       //когда счетчик ГЕОС кратен 200(200,400,600..), то вынимаем значения повторений
@@ -457,20 +458,20 @@ while i<=numberOfPocket do
           slowParamSCRUTJ:=CollectSlowParam(iByte);
         end;
 
-      //Вынимаем время.
+      //Вынимаем время. Вынимаются из двух последних байтов пакета
       //время начинает приходить по счетчику каждые 2000 и по 8 байт в 4 пакетах
       if ((countSCRUTJT-cT+1) mod 2000 =0) then
         begin
           CollectTime(iByte);
         end;
 
-      //вынимаем широту
+      //вынимаем широту. Вынимаются из двух последних байтов пакета
       if ((countSCRUTJT-cS-3) mod 2000 =0) then
         begin
           CollectLatitude(iByte);
         end;
 
-      //вынимаем долготу
+      //вынимаем долготу. Вынимаются из двух последних байтов пакета 
       if ((countSCRUTJT-cD-7) mod 2000 =0) then
         begin
           CollectLongtitude(iByte);
@@ -1195,7 +1196,7 @@ var
 folderStr:string;
 begin
 fileIndex:=0;
-
+//
 form1.FileNumTrack.Enabled:=true;
 form1.TrackBar1.Enabled:=true;
 
@@ -1210,7 +1211,6 @@ if SelectDirectory('Выберите каталог в котором лежат файлы-записи СКРУТЖТ','\', 
         form1.FileNumTrack.Min:=1;
         form1.FileNumTrack.Position:=1;
 
-        //ShowMessage('Успешно');
         //связываем с первым файлом массива
         openFileForIndex(fileIndex);
         //считаем коэф. масштабирования относительно текущего открытого файла
@@ -1251,42 +1251,6 @@ else
   begin
     ShowMessage('Каталог не выбран!');
   end;
-
-//Формируем название файла СK
-{fileName:='Содержимое СКРУТЖТ_'+DateToStr(Date)+'_'+TimeToStr(Time)+'.txt';
-//меняем : на .
-for i:=1 to length(fileName) do
-  begin
-    if (fileName[i]=':') then
-      begin
-        fileName[i]:='.';
-      end;
-  end;
-//дописываем путь до каталога
-fileName:=ExtractFileDir(ParamStr(0))+'\Report\'+fileName;
-
-//связываем файл и открываем его на запись
-AssignFile(SCRUTtextFile,fileName);
-ReWrite(SCRUTtextFile); }
-
-
-//-----------------------------------------------------------------------
-//заполнение текстового файла СКРУТЖТ
-{while stream.Position<=stream.Size do
-  begin
-    Stream.Read(pocketSCRUTJT, SizeOf(pocketSCRUTJT));
-    strPocket:='';
-    iByte:=1;
-    while iByte<=length(pocketSCRUTJT) do
-      begin
-        strPocket:=strPocket+intTostr(pocketSCRUTJT[iByte])+' '{Tab};
-{        inc(iByte);
-      end;
-    //Пишем содержимое пакета в файл.
-    SaveResultToFile(strPocket);
-  end;
-closeFile(SCRUTtextFile); }
-//------------------------------------------------------------------------
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
@@ -1388,7 +1352,6 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-
 //ShowMessage('Все');
 Stream.Free;
 end;
@@ -1396,41 +1359,6 @@ end;
 procedure TForm1.TrackBar2Change(Sender: TObject);
 begin
 numPocketSp:=form1.TrackBar2.Position;
-
-//form1.Label5.Caption:=intToStr(form1.TrackBar2.Position);
-
-{case form1.TrackBar2.Position of
-  //-4X
-  1:
-    begin
-      //5 пакетов
-      numPocketSp:=trunc(RTPOCKETNUM/4);
-    end;
-  //-2X
-  2:
-    begin
-      //10 пакетов
-      numPocketSp:=trunc(RTPOCKETNUM/2);
-    end;
-  //RT(X)
-  3:
-    begin
-      //скорость = число пакетов за 10 мс. 20 пакетов
-      numPocketSp:=RTPOCKETNUM;
-    end;
-  //2X
-  4:
-    begin
-      //40 пакетов
-      numPocketSp:=trunc(RTPOCKETNUM*2);
-    end;
-  //4X
-  5:
-    begin
-      //80 пакетов
-      numPocketSp:=trunc(RTPOCKETNUM*4);
-    end;
-end}
 end;
 
 procedure TForm1.FileNumTrackChange(Sender: TObject);

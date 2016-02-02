@@ -46,6 +46,7 @@ type
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
+    Label1: TLabel;
     procedure changeFileClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure StartButtonClick(Sender: TObject);

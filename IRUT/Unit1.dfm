@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 143
   Width = 1549
   Height = 879
-  Caption = #1057#1050#1056#1059#1058#1046#1058
+  Caption = 'IRUTPlayer'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -328,6 +328,19 @@ object Form1: TForm1
       Width = 131
       Height = 24
       Caption = #1053#1086#1084#1077#1088' '#1092#1072#1081#1083#1072
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlue
+      Font.Height = -19
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object Label1: TLabel
+      Left = 24
+      Top = 16
+      Width = 261
+      Height = 24
+      Caption = #1055#1086#1083#1086#1078#1077#1085#1080#1077' '#1087#1088#1086#1080#1075#1088#1099#1074#1072#1085#1080#1103
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlue
       Font.Height = -19

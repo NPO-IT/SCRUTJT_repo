@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, xpman, ExtCtrls, StdCtrls, Series, TeEngine, TeeProcs, Chart,
-  ComCtrls,DateUtils, Math, FileCtrl, Unit2;
+  ComCtrls,DateUtils, Math, FileCtrl, Unit2, IniFiles;
 const
 POCKETSIZE=24;//размер пакета СКРУТЖТ
 //TRACK_SIZE_KOEF=224;//коэф. масштабирования для ТрекБара
@@ -43,10 +43,8 @@ type
     Label5: TLabel;
     FileNumTrack: TTrackBar;
     Label6: TLabel;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
     Label1: TLabel;
+    Button4: TButton;
     procedure changeFileClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure StartButtonClick(Sender: TObject);
@@ -58,8 +56,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure TrackBar2Change(Sender: TObject);
     procedure FileNumTrackChange(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -130,6 +127,9 @@ var
   //переменные для хранения пользов интервала с строковом виде
   beginInterval:string;
   endInterval:string;
+
+  //переменная для работы с файлом конфигурации
+  confIni:TIniFile;
 procedure openFileForIndex(ind:integer);
 function TestTime(time:string):boolean; //объявление для возможности запуска из др. юнита
 procedure WriteInterval(numF:integer;offsetF:int64;timeBegStr:string;timeEndStr:string);
@@ -1189,6 +1189,16 @@ end;
 //==============================================================================
 
 
+//==============================================================================
+//Работа с файлом конфигурации. Вынимаем параметры для работы ПО 
+//==============================================================================
+procedure WorkWithConfig(confPath:string);
+begin
+confIni:=TiniFile.Create(confPath);
+confIni.Free;
+end;
+//==============================================================================
+
 procedure TForm1.changeFileClick(Sender: TObject);
 var
 //strPocket:string;
@@ -1223,9 +1233,8 @@ if SelectDirectory('Выберите каталог в котором лежат файлы-записи СКРУТЖТ','\', 
         //доступность кнопки старта для работы дальше
         form1.StartButton.Enabled:=true;
         form1.changeFile.Enabled:=false;
-        form1.Button1.Enabled:=true;
-        form1.Button2.Enabled:=true;
-        form1.Button3.Enabled:=true;
+        form1.Button4.Enabled:=true;
+
 
         //---for Time
         skT:=1;
@@ -1241,6 +1250,26 @@ if SelectDirectory('Выберите каталог в котором лежат файлы-записи СКРУТЖТ','\', 
 
         //первичная инициализация скорости работы проги
         numPocketSp:=RTPOCKETNUM;
+
+        ShowMessage('Выберите файл конфигурации');
+
+        while (true) do
+          begin
+            //выбрать файл конфигурации
+            if form1.OpenDialog1.Execute then
+              begin
+                //делаем текущий каталог каталогом по умолчанию
+                form1.OpenDialog1.InitialDir := GetCurrentDir;
+                //фильтр на выбор только типа ини
+                form1.OpenDialog1.Filter :='*.ini';
+                WorkWithConfig(form1.OpenDialog1.FileName);
+                break;
+              end
+            else
+              begin
+                ShowMessage('Ошибка! Файл конфигураций не выбран!');
+              end;
+          end;
       end
     else
       begin
@@ -1306,9 +1335,7 @@ form1.Image1.Canvas.Rectangle(0,0,form1.Image1.Width,form1.Image1.Height);
 form1.changeFile.Enabled:=true;
 form1.StartButton.Enabled:=false;
 form1.StopButton.Enabled:=false;
-form1.Button1.Enabled:=false;
-form1.Button2.Enabled:=false;
-form1.Button3.Enabled:=false;
+form1.Button4.Enabled:=false;
 form1.FileNumTrack.Enabled:=false;
 form1.TrackBar1.Enabled:=false;
 
@@ -1394,8 +1421,9 @@ changeFileFlag:=true;
 form1.Timer1.Enabled:=true;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.Button4Click(Sender: TObject);
 begin
+//запись файла мгновенных значений
 //перед каждой записью обнуляем вспомогательный массив и его счетчик
 recordInfoMas:=nil;
 irecordInfoMas:=0;
@@ -1409,10 +1437,13 @@ stream.Free;
 //form1.Hide;
 form1.Enabled:=false;
 form2.Show;
-end;
 
-procedure TForm1.Button3Click(Sender: TObject);
-begin
+//запись файла среднеквадратичных отклонений в заданных полосах частот
+
+
+
+
+//запись файла абсолютных максимумов за обрабатываемый интервал
 //перед каждой записью обнуляем вспомогательный массив и его счетчик
 recordInfoMas:=nil;
 irecordInfoMas:=0;

@@ -7,7 +7,7 @@ uses
   Dialogs, xpman, ExtCtrls, StdCtrls, Series, TeEngine, TeeProcs, Chart,
   ComCtrls,DateUtils, Math, FileCtrl, Unit2, IniFiles;
 const
-POCKETSIZE=24;//размер пакета СКРУТЖТ
+POCKETSIZE=28;//размер пакета СКРУТЖТ
 //TRACK_SIZE_KOEF=224;//коэф. масштабирования для ТрекБара
 RTPOCKETNUM=31;// количество обр. пакетов за 10 мс таймера в реалтайме
 MAXNUMINDOUBLE=1.79E25;
@@ -165,6 +165,74 @@ Writeln(outF,str);
 end;
 //==============================================================================
 
+//==============================================================================
+//Функция формирующая список файлов(полные пути) и полный размер записи. Без вложенности.
+//==============================================================================
+function FillFileArray(var treeDirPath:string;
+  var SCRUTfileArr:TMyArrayOfString;var allRecordSize:Int64):boolean;
+var
+//запись найденного в каталоге файла
+searchResult : TSearchRec;
+iSCRUTfileArr:integer;
+
+begin
+
+allRecordSize:=0;
+SCRUTfileArr:=nil;
+iSCRUTfileArr:=0;
+
+//-----------
+//добавим \ в конец каталога если его нет
+if treeDirPath[length(treeDirPath)]<>'\' then
+  begin
+    treeDirPath:=treeDirPath+'\';
+  end;
+//-----------
+
+//находим первое совпадение файла исходя из условий
+if FindFirst(treeDirPath+'SKRUTZHT *',faAnyFile,searchResult)=0 then
+  begin
+    SetLength(SCRUTfileArr,iSCRUTfileArr+1);
+    //полный путь к файлу
+    SCRUTfileArr[iSCRUTfileArr].path:=treeDirPath+searchResult.Name;
+    //размер файла в байтах
+    SCRUTfileArr[iSCRUTfileArr].size:=searchResult.Size;
+    inc(iSCRUTfileArr);
+    allRecordSize:=allRecordSize+searchResult.Size;
+    //ищем повторные совпадения пока не найдем все
+    while FindNext(searchResult) = 0 do
+      begin
+        SetLength(SCRUTfileArr,iSCRUTfileArr+1);
+        //полный путь к файлу
+        SCRUTfileArr[iSCRUTfileArr].path:=treeDirPath+searchResult.Name;
+        //размер файла в байтах
+        SCRUTfileArr[iSCRUTfileArr].size:=searchResult.Size;
+        inc(iSCRUTfileArr);
+        allRecordSize:=allRecordSize+searchResult.Size;
+      end;
+    FindClose(searchResult);
+    result:=true;
+  end
+else
+  begin
+    //ошибка в поиске файлов
+    //освобождаем структуру поиска
+    FindClose(searchResult);
+    result:=false;
+  end;
+end;
+//==============================================================================
+
+
+//==============================================================================
+//Работа с файлом конфигурации. Вынимаем параметры для работы ПО
+//==============================================================================
+procedure WorkWithConfig(confPath:string);
+begin
+confIni:=TiniFile.Create(confPath);
+confIni.Free;
+end;
+//==============================================================================
 
 //==============================================================================
 //Функция для сбора счетчика пакета. Передается номер младшего байта. Вернет счетчик
@@ -181,39 +249,7 @@ cSCRUTJT:=cSCRUTJT+pocketSCRUTJT[iByteDj];//записали младший байт
 //form1.Memo1.Lines.Add('');
 result:=cSCRUTJT;
 end;
-
 //==============================================================================
-//Вывод на диаграмму и гистргамму
-//==============================================================================
-procedure OutToDiaAndGist(var iB:integer);
-begin
-form1.Chart1.Series[0].Clear;
-while iB<=POCKETSIZE-2 do
-  begin
-    //вывод столбца на диаграмму
-    form1.Chart1.Series[0].AddXY(iB-2,pocketSCRUTJT[iB]);
-    //Вывод выбранного значения байта на гистограмму
-    //==
-    if (graphFlag) then
-      begin
-        if iB=chanelIndex+3 then
-          begin
-            form1.Chart2.Series[0].AddXY(iGist,pocketSCRUTJT[iB]);
-            inc(iGist);
-            if iGist>round(form1.Chart2.BottomAxis.Maximum) then
-              begin
-                iGist:=0;
-                form1.Chart2.Series[0].Clear;
-              end;
-          end;
-      end;
-    //==
-    inc(iB);
-  end;
-end;
-
-//==============================================================================
-
 
 //==============================================================================
 //Сбор медленного параметра
@@ -226,7 +262,7 @@ end;
 
 
 //==============================================================================
-//
+//Собираем значение времени
 //==============================================================================
 procedure CollectTime(iB:integer);
 var
@@ -295,7 +331,7 @@ end;
 //==============================================================================
 
 //==============================================================================
-//
+//Собираем значение широты
 //==============================================================================
 procedure CollectLatitude(iB:integer);
 var
@@ -336,11 +372,10 @@ if skS=9 then
       end;
   end;
 end;
-
 //==============================================================================
 
 //==============================================================================
-//
+//Собираем значение долготы
 //==============================================================================
 procedure CollectLongtitude(iB:integer);
 var
@@ -391,8 +426,41 @@ if skD=9 then
       end;
   end;
 end;
+//==============================================================================
 
 //==============================================================================
+//Вывод на диаграмму и гистограмму
+//==============================================================================
+procedure OutToDiaAndGist(var iB:integer);
+begin
+form1.Chart1.Series[0].Clear;
+while iB<=POCKETSIZE-2 do
+  begin
+    //вывод столбца на диаграмму
+    form1.Chart1.Series[0].AddXY(iB-2,pocketSCRUTJT[iB]);
+    //Вывод выбранного значения байта на гистограмму
+    //==
+    if (graphFlag) then
+      begin
+        if iB=chanelIndex+3 then
+          begin
+            form1.Chart2.Series[0].AddXY(iGist,pocketSCRUTJT[iB]);
+            inc(iGist);
+            if iGist>round(form1.Chart2.BottomAxis.Maximum) then
+              begin
+                iGist:=0;
+                form1.Chart2.Series[0].Clear;
+              end;
+          end;
+      end;
+    //==
+    inc(iB);
+  end;
+end;
+//==============================================================================
+
+
+
 
 //==============================================================================
 // Процедура открытия файла по индексу
@@ -435,12 +503,13 @@ if (bool) then
     form1.TrackBar1.Position:=1;
   end;
 
-
+//последовательно обрабатываем пакеты
 while i<=numberOfPocket do
   begin
     try
-      //читаем из файла 24 байта()
+      //читаем из файла 28 байтов
       Stream.Read(pocketSCRUTJT, SizeOf(pocketSCRUTJT));
+
       //первые 2 байта счетчик (0..59999)
       //счетчик пакета(слово).Собираем его.
       iByte:=1;
@@ -448,7 +517,7 @@ while i<=numberOfPocket do
 
       iByte:=3;
       //Вывод быстрых параметров на Диаграмму и вывод на график
-      //1-20 быстрых по 1 байту
+      //1-24 быстрых по 1 байту
       OutToDiaAndGist(iByte);
 
       //когда счетчик ГЕОС кратен 200(200,400,600..), то вынимаем значения повторений
@@ -520,7 +589,7 @@ while i<=numberOfPocket do
     //end try
     end;
 
-    //================
+
     inc(i);
   end;
 
@@ -1129,76 +1198,6 @@ closeFile(SCRUTtextFile);
 end;
 //==============================================================================
 
-
-//==============================================================================
-//Функция формирующая список файлов(полные пути) и полный размер записи. Без вложенности.
-//==============================================================================
-function FillFileArray(var treeDirPath:string;
-  var SCRUTfileArr:TMyArrayOfString;var allRecordSize:Int64):boolean;
-var
-//запись найденного в каталоге файла
-searchResult : TSearchRec;
-iSCRUTfileArr:integer;
-
-begin
-
-allRecordSize:=0;
-SCRUTfileArr:=nil;
-iSCRUTfileArr:=0;
-
-//-----------
-//добавим \ в конец каталога если его нет
-if treeDirPath[length(treeDirPath)]<>'\' then
-  begin
-    treeDirPath:=treeDirPath+'\';
-  end;
-//-----------
-
-//находим первое совпадение файла исходя из условий
-if FindFirst(treeDirPath+'SKRUTZHT *',faAnyFile,searchResult)=0 then
-  begin
-    SetLength(SCRUTfileArr,iSCRUTfileArr+1);
-    //полный путь к файлу
-    SCRUTfileArr[iSCRUTfileArr].path:=treeDirPath+searchResult.Name;
-    //размер файла в байтах
-    SCRUTfileArr[iSCRUTfileArr].size:=searchResult.Size;
-    inc(iSCRUTfileArr);
-    allRecordSize:=allRecordSize+searchResult.Size;
-    //ищем повторные совпадения пока не найдем все
-    while FindNext(searchResult) = 0 do
-      begin
-        SetLength(SCRUTfileArr,iSCRUTfileArr+1);
-        //полный путь к файлу
-        SCRUTfileArr[iSCRUTfileArr].path:=treeDirPath+searchResult.Name;
-        //размер файла в байтах
-        SCRUTfileArr[iSCRUTfileArr].size:=searchResult.Size;
-        inc(iSCRUTfileArr);
-        allRecordSize:=allRecordSize+searchResult.Size;
-      end;
-    FindClose(searchResult);
-    result:=true;
-  end
-else
-  begin
-    //ошибка в поиске файлов
-    //освобождаем структуру поиска
-    FindClose(searchResult);
-    result:=false;
-  end;
-end;
-//==============================================================================
-
-
-//==============================================================================
-//Работа с файлом конфигурации. Вынимаем параметры для работы ПО 
-//==============================================================================
-procedure WorkWithConfig(confPath:string);
-begin
-confIni:=TiniFile.Create(confPath);
-confIni.Free;
-end;
-//==============================================================================
-
 procedure TForm1.changeFileClick(Sender: TObject);
 var
 //strPocket:string;
@@ -1261,13 +1260,14 @@ if SelectDirectory('Выберите каталог в котором лежат файлы-записи СКРУТЖТ','\', 
                 //делаем текущий каталог каталогом по умолчанию
                 form1.OpenDialog1.InitialDir := GetCurrentDir;
                 //фильтр на выбор только типа ини
-                form1.OpenDialog1.Filter :='*.ini';
+                form1.OpenDialog1.Filter :='INI|*.ini';
                 WorkWithConfig(form1.OpenDialog1.FileName);
                 break;
               end
             else
               begin
                 ShowMessage('Ошибка! Файл конфигураций не выбран!');
+                break;
               end;
           end;
       end

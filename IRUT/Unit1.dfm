@@ -123,9 +123,9 @@ object Form1: TForm1
     object changeFile: TButton
       Left = 0
       Top = 0
-      Width = 153
+      Width = 169
       Height = 49
-      Caption = #1042#1099#1073#1088#1072#1090#1100' '#1082#1072#1090#1072#1083#1086#1075
+      Caption = #1042#1099#1073#1088#1072#1090#1100' '#1074#1093'.'#1076#1072#1085#1085#1099#1077
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -16
@@ -136,7 +136,7 @@ object Form1: TForm1
       OnClick = changeFileClick
     end
     object StartButton: TButton
-      Left = 152
+      Left = 168
       Top = 0
       Width = 129
       Height = 49
@@ -151,9 +151,9 @@ object Form1: TForm1
       OnClick = StartButtonClick
     end
     object StopButton: TButton
-      Left = 280
-      Top = 0
-      Width = 121
+      Left = 168
+      Top = 48
+      Width = 129
       Height = 49
       Caption = #1057#1090#1086#1087' '#1088#1072#1079#1073#1086#1088#1072
       Font.Charset = DEFAULT_CHARSET
@@ -165,12 +165,12 @@ object Form1: TForm1
       TabOrder = 2
       OnClick = StopButtonClick
     end
-    object Button1: TButton
+    object Button4: TButton
       Left = 0
       Top = 48
-      Width = 153
+      Width = 169
       Height = 49
-      Caption = #1047#1072#1087'. '#1052#1075'.'
+      Caption = #1054#1073#1088#1072#1073#1086#1090#1072#1090#1100' '#1076#1072#1085#1085#1099#1077
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -16
@@ -178,36 +178,7 @@ object Form1: TForm1
       Font.Style = []
       ParentFont = False
       TabOrder = 3
-      OnClick = Button1Click
-    end
-    object Button2: TButton
-      Left = 152
-      Top = 48
-      Width = 129
-      Height = 49
-      Caption = #1047#1072#1087'. '#1089#1088'.'#1082#1074'.'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -16
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 4
-    end
-    object Button3: TButton
-      Left = 280
-      Top = 48
-      Width = 121
-      Height = 49
-      Caption = #1047#1072#1087'. '#1072#1073#1089'.'#1084#1072#1082#1089'. '
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -16
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 5
-      OnClick = Button3Click
+      OnClick = Button4Click
     end
   end
   object Chart1: TChart

@@ -12,6 +12,9 @@ POCKETSIZE=28;//размер пакета СКРУТЖТ
 RTPOCKETNUM=31;// количество обр. пакетов за 10 мс таймера в реалтайме
 MAXNUMINDOUBLE=1.79E25;
 MAXFORERROR=1.7E10;//барьер для обхода сбоев про сборе времени
+//колич. точек для подсчета спектра
+MAX_POINT_IN_SPECTR=512;
+
 type
   TForm1 = class(TForm)
     Panel1: TPanel;
@@ -45,6 +48,8 @@ type
     Label6: TLabel;
     Label1: TLabel;
     Button4: TButton;
+    spectrDia: TChart;
+    Series3: TBarSeries;
     procedure changeFileClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure StartButtonClick(Sender: TObject);
@@ -77,6 +82,10 @@ type
 
   //тип для передаче динамич массива в качестве параметра
   TMyArrayOfString=array of TfileMiniInfo;
+  //входной тип для вычисления масс. спектра
+  TByteArr=array [1..MAX_POINT_IN_SPECTR] of byte;
+  //возвращаемый тип спектра
+  TIntArr=array [1..MAX_POINT_IN_SPECTR] of integer;
 var
   Form1: TForm1;
 
@@ -130,6 +139,12 @@ var
 
   //переменная для работы с файлом конфигурации
   confIni:TIniFile;
+  //счетчик точек во входном массиве для вычисления спектра
+  countPointInSpArr:integer;
+  //входной массив для выч. спектра
+  spArrayIn:TByteArr;
+   //выходной массив спектра
+  spArrayOut:TIntArr;
 procedure openFileForIndex(ind:integer);
 function TestTime(time:string):boolean; //объявление для возможности запуска из др. юнита
 procedure WriteInterval(numF:integer;offsetF:int64;timeBegStr:string;timeEndStr:string);
@@ -482,6 +497,111 @@ end;
 //==============================================================================
 
 //==============================================================================
+//заполнение массива спектра
+//==============================================================================
+function WriteSpArr(var spArray:TByteArr;iB:integer;countWritePoint:integer):integer;
+begin
+//while iB<=POCKETSIZE-2 do
+  //begin
+    spArray[countWritePoint]:=pocketSCRUTJT[iB];
+    inc(iB);
+    inc(countWritePoint);
+  //end;
+result:=countWritePoint;
+end;
+//==============================================================================
+
+//==============================================================================
+//Вычисление спектра сигнала
+//==============================================================================
+function CalculateSpectr(spArray:TByteArr):TIntArr;
+var
+i:integer;
+j:integer;
+iPrev:integer;
+Ere:array [1..round(length(spArray)/2)] of double;
+Eim:array [1..round(length(spArray)/2)] of double;
+Ore:array [1..round(length(spArray)/2)] of double;
+Oim:array [1..round(length(spArray)/2)] of double;
+
+XoutRe:array [1..length(spArray)] of double;
+XoutIm:array [1..length(spArray)] of double;
+Xout:TIntArr;
+
+//размерность переданного массива.
+arrSize:integer;
+//половина размера массива
+arrSizeDiv2:integer;
+begin
+arrSize:=length(spArray);
+arrSizeDiv2:=round(length(spArray)/2);
+
+for i:=1 to  round(length(spArray)/2) do
+  begin
+    Ere[i]:=0.0;
+    Eim[i]:=0.0;
+    Ore[i]:=0.0;
+    Oim[i]:=0.0;
+  end;
+
+for i:=1 to  length(spArray) do
+  begin
+    XoutRe[i]:=0;
+    XoutIm[i]:=0;
+    Xout[i]:=0;
+  end;
+
+for i:=1 to arrSizeDiv2 do
+  begin
+    iPrev:=i-1;
+    for j:=1 to arrSizeDiv2-1 do
+      begin
+        Ere[i]:=Ere[i]+spArray[2*j]*cos(2*PI*j*iPrev/arrSizeDiv2);
+        Eim[i]:=Eim[i]-spArray[2*j]*sin(2*PI*j*iPrev/arrSizeDiv2);
+
+        Ore[i]:=Ore[i]+(spArray[2*j+1]*cos(2*PI*j*iPrev/arrSizeDiv2));
+        Oim[i]:=Oim[i]-(spArray[2*j+1]*sin(2*PI*j*iPrev/arrSizeDiv2));
+      end;
+  end;
+  
+for i:=1 to arrSizeDiv2 do
+  begin
+    iPrev:=i-1;
+    XoutRe[i]:=(Ere[i]+Oim[i]*sin(2*PI*iPrev/arrSize)+Ore[i]*cos(2*PI*iPrev/arrSize));
+    XoutIm[i]:=(Eim[i]+Oim[i]*cos(2*PI*iPrev/arrSize)-Ore[i]*sin(2*PI*iPrev/arrSize));
+
+    Xout[i]:=round(Sqrt(Sqr(XoutRe[i])+Sqr(XoutIm[i])));
+
+    XoutRe[i+arrSizeDiv2]:=(Ere[i]-Oim[i]*sin(2*PI*iPrev/arrSize)-Ore[i]*cos(2*PI*iPrev/arrSize)) ;
+    XoutIm[i+arrSizeDiv2]:=(Eim[i]-Oim[i]*cos(2*PI*iPrev/arrSize)+Ore[i]*sin(2*PI*iPrev/arrSize)) ;
+
+    Xout[i+arrSizeDiv2]:=round(Sqrt(Sqr(XoutRe[i+arrSizeDiv2])+sqr(XoutIm[i+arrSizeDiv2])));
+  end;
+
+result:=Xout;
+end;
+//==============================================================================
+
+//==============================================================================
+//
+//==============================================================================
+procedure OutSpectr(spArrayOut:TIntArr);
+var
+i:integer;
+begin
+//отчистили спектр
+form1.spectrDia.Series[0].Clear;
+for i:=1 to round(length(spArrayOut)/2) do
+  begin
+    form1.spectrDia.Series[0].AddXY(i-1,spArrayOut[i]);
+  end;
+
+end;
+//===============================================================================
+
+
+
+//==============================================================================
 //Процедура по разбору пакета СКРУТЖТ. Передается количество пакетов.
 //==============================================================================
 procedure ParsePocket(numberOfPocket:word;var bool:boolean);
@@ -519,6 +639,27 @@ while i<=numberOfPocket do
       //Вывод быстрых параметров на Диаграмму и вывод на график
       //1-24 быстрых по 1 байту
       OutToDiaAndGist(iByte);
+
+      {if countPointInSpArr=101 then
+        begin
+          form1.Memo1.Lines.Add('1');
+        end;}
+
+      //заполняем массив для выч. спектра. c 3 байта
+      countPointInSpArr:=WriteSpArr(spArrayIn,iByte-(POCKETSIZE-4),countPointInSpArr);
+
+      //проверяем не собрали ли нужное количество точек.
+      if countPointInSpArr=MAX_POINT_IN_SPECTR+1 then
+        begin
+          //вычисляем спектр
+          countPointInSpArr:=1;
+          //вычисление спектра
+          spArrayOut:=CalculateSpectr(spArrayIn);
+          //вывод спектра на диаграмму спектра
+          OutSpectr(spArrayOut);
+        end ;
+
+
 
       //когда счетчик ГЕОС кратен 200(200,400,600..), то вынимаем значения повторений
       //+1 т.к счетчик с 0
@@ -562,6 +703,7 @@ while i<=numberOfPocket do
       //form1.Memo1.Lines.Add('Текущая позиция в файле'+IntToStr(stream.Position)+' из '+intToStr(stream.Size));
     finally
       //проверяем каждый раз дошли ли до конца файла. Дошли значит заканчиваем работу с файлом
+      //form1.Memo1.Lines.Add(intToStr(stream.Position));
       if  stream.Position>=stream.Size then
         begin
           form1.Timer1.Enabled:=false;
@@ -1293,9 +1435,9 @@ procedure TForm1.StartButtonClick(Sender: TObject);
 begin
 form1.StartButton.Enabled:=false;
 form1.StopButton.Enabled:=true;
-iGist:=0;
-graphFlag:=false;
-chanelIndex:=0;
+
+
+
 
 //начало разбора
 form1.Timer1.Enabled:=true;
@@ -1306,6 +1448,10 @@ begin
 form1.StartButton.Enabled:=true;
 form1.StopButton.Enabled:=false;
 form1.Timer1.Enabled:=false;
+//сбрасываем вывод на гистограмму сначала
+//iGist:=0;
+//очищием вывод
+//form1.Chart2.Series[0].Clear;
 end;
 
 procedure TForm1.Series1Click(Sender: TChartSeries; ValueIndex: Integer;
@@ -1342,6 +1488,11 @@ form1.TrackBar1.Enabled:=false;
 //инициализация счетчика для масштабирования трекбара
 countTrack:=1;
 changeFileFlag:=true;
+graphFlag:=false;
+iGist:=0;
+chanelIndex:=0;
+//счетчик для заполнения массива спектра
+countPointInSpArr:=1;
 end;
 
 procedure TForm1.TrackBar1Change(Sender: TObject);
@@ -1374,7 +1525,8 @@ else
 form1.StopButton.Enabled:=true;
 
 form1.Timer1.Enabled:=false;
-stream.Position:=form1.TrackBar1.Position*POCKETSIZE*trackSizeKoef;
+//внесено изменение в позиции трекбара файла для правильонй выборки из файла
+stream.Position:=(form1.TrackBar1.Position-1)*POCKETSIZE*trackSizeKoef;
 form1.Timer1.Enabled:=true;
 end;
 
@@ -1423,7 +1575,8 @@ end;
 
 procedure TForm1.Button4Click(Sender: TObject);
 begin
-//запись файла мгновенных значений
+
+{//запись файла мгновенных значений
 //перед каждой записью обнуляем вспомогательный массив и его счетчик
 recordInfoMas:=nil;
 irecordInfoMas:=0;
@@ -1456,7 +1609,7 @@ deltaInFileForBack:=stream.Position;
 stream.Free;
 //form1.Hide;
 form1.Enabled:=false;
-form3.Show;
+form3.Show;  }
 end;
 
 end.

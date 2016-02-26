@@ -1,8 +1,8 @@
 object Form1: TForm1
-  Left = 208
-  Top = 143
+  Left = 189
+  Top = 121
   Width = 1549
-  Height = 879
+  Height = 882
   Caption = 'IRUTPlayer'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,15 +16,15 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object Image1: TImage
-    Left = -24
-    Top = 512
-    Width = 1553
-    Height = 265
+    Left = 1152
+    Top = 584
+    Width = 369
+    Height = 73
   end
   object Splitter1: TSplitter
     Left = 0
     Top = 0
-    Height = 841
+    Height = 844
   end
   object Panel1: TPanel
     Left = 0
@@ -373,6 +373,37 @@ object Form1: TForm1
       Position = 20
       TabOrder = 0
       OnChange = TrackBar2Change
+    end
+  end
+  object spectrDia: TChart
+    Left = 0
+    Top = 528
+    Width = 1129
+    Height = 250
+    BackWall.Brush.Color = clWhite
+    BackWall.Brush.Style = bsClear
+    Title.Font.Charset = DEFAULT_CHARSET
+    Title.Font.Color = clBlue
+    Title.Font.Height = -19
+    Title.Font.Name = 'Arial'
+    Title.Font.Style = []
+    Title.Text.Strings = (
+      #1057#1087#1077#1082#1090#1088)
+    Legend.Visible = False
+    View3D = False
+    TabOrder = 6
+    object Series3: TBarSeries
+      Marks.ArrowLength = 20
+      Marks.Visible = False
+      SeriesColor = 10485760
+      XValues.DateTime = False
+      XValues.Name = 'X'
+      XValues.Multiplier = 1.000000000000000000
+      XValues.Order = loAscending
+      YValues.DateTime = False
+      YValues.Name = 'Bar'
+      YValues.Multiplier = 1.000000000000000000
+      YValues.Order = loNone
     end
   end
   object OpenDialog1: TOpenDialog

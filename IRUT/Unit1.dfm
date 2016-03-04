@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 211
-  Top = 140
+  Left = 122
+  Top = 462
   Width = 1549
   Height = 882
   Caption = 'IRUTPlayer'

@@ -522,16 +522,37 @@ begin
 form1.Chart1.Series[0].Clear;
 while iB<=POCKETSIZE-2 do
   begin
-    //вывод столбца на диаграмму
-    form1.Chart1.Series[0].AddXY(iB-2,pocketSCRUTJT[iB]);
+    //вывод столбца на диаграмму. c 1 .
+    //проверяем подключен ли канал, если нет вместо значений выволди нули
+    if (arrEnableSensors[iB-2]) then
+      begin
+        form1.Chart1.Series[0].AddXY(iB-2,pocketSCRUTJT[iB]);
+      end
+    else
+      begin
+        // канал не подлючен выводим нули
+        form1.Chart1.Series[0].AddXY(iB-2,0);
+      end;
+
+
+
     //Вывод выбранного значения байта на гистограмму
     //==
     if (graphFlag) then
       begin
         if iB=chanelIndex+3 then
           begin
-            form1.Chart2.Series[0].AddXY(iGist,pocketSCRUTJT[iB]);
-            inc(iGist);
+            //проверяем подключен ли выводимый на гист. канал
+            if (arrEnableSensors[iB]) then
+              begin
+                form1.Chart2.Series[0].AddXY(iGist,pocketSCRUTJT[iB]);
+                inc(iGist);
+              end
+            else
+              begin
+                // канал не подлючен выводим нули
+                form1.Chart2.Series[0].AddXY(iGist,0);
+              end;
             if iGist>round(form1.Chart2.BottomAxis.Maximum) then
               begin
                 iGist:=0;

@@ -14,7 +14,8 @@ MAXNUMINDOUBLE=1.79E25;
 MAXFORERROR=1.7E10;//барьер для обхода сбоев про сборе времени
 //колич. точек для подсчета спектра
 MAX_POINT_IN_SPECTR=512;
-
+//максимальное количество датчиков подкл. к ИРУТ 24+3
+MAX_SENSOR_COUNT=27;
 type
   TForm1 = class(TForm)
     Panel1: TPanel;
@@ -159,7 +160,8 @@ var
 
   //количество подинтервалов
   countInterval:integer;
-
+  //заполняем массив подкл. датчиков
+  arrEnableSensors:array [1..MAX_SENSOR_COUNT] of boolean;
 procedure openFileForIndex(ind:integer);
 function TestTime(time:string):boolean; //объявление для возможности запуска из др. юнита
 procedure WriteInterval(numF:integer;offsetF:int64;timeBegStr:string;timeEndStr:string);
@@ -259,6 +261,11 @@ end;
 //Работа с файлом конфигурации. Вынимаем параметры для работы ПО
 //==============================================================================
 procedure WriteConfParam(confPath:string);
+var
+//счетчик для заполнения мааасва подключенных каналов
+i:integer;
+//счетчик для перебора медленных датчиков
+k:integer; 
 begin
 confIni:=TiniFile.Create(confPath);
 //заполнение параметров из конф. файла
@@ -269,6 +276,46 @@ intervalSize:=confIni.readInteger('Общие параметры', 'Длительность обр. интервал
 poolFastFreq:=confIni.readInteger('Быстрые общие параметры', 'Частота дискретизации',0);
 //запишем длительонсть обр. интервала в количестве точек
 poolFastVal:=poolFastFreq*intervalSize;
+
+//заполним массив подкл. акселерометров
+i:=1;
+while i<=MAX_SENSOR_COUNT-3 do
+  begin
+    if confIni.readString('Канал '+intToStr(i), 'Состояние','')='ВКЛ' then
+      begin
+        arrEnableSensors[i]:=true;
+      end
+    else
+      begin
+        arrEnableSensors[i]:=false;
+      end;
+    inc(i);
+  end;
+
+k:=1;
+//заполним массив медленных
+while i<=MAX_SENSOR_COUNT do
+  begin
+    if confIni.readString('Датчик температуры\влажности № '+intToStr(k), 'Состояние','')='ВКЛ' then
+      begin
+        arrEnableSensors[i]:=true;
+      end
+    else
+      begin
+        if confIni.readString('Датчик давления', 'Состояние','')='ВКЛ' then
+          begin
+            arrEnableSensors[i]:=true;
+          end
+        else
+          begin
+            arrEnableSensors[i]:=false;
+          end;
+      end;
+    inc(k);
+    inc(i);
+  end;
+
+
 confIni.Free;
 end;
 //==============================================================================

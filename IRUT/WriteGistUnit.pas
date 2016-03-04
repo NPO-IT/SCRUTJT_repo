@@ -112,7 +112,7 @@ iFile:=1;
 while iFile<=FILE_NUM do
   begin
     //формируем имя файла
-    fileName:=ExtractFileDir(ParamStr(0))+'\Report\'+'Канал'+IntToStr(iFile)+'_hist'+'.xls';
+    fileName:=ExtractFileDir(ParamStr(0))+'\Report\'+'\hist\'+'Канал'+IntToStr(iFile)+'_hist'+'.xls';
     //связали дял записи
     AssignFile(filesGistArray[iFile],fileName);
     //открыли на запись. При повторной записи предидущее содержимое затрется

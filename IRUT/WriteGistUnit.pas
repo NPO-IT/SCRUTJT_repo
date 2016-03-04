@@ -56,7 +56,7 @@ iBufArrCount:integer;
 fileBufCount:integer;
 inlCount:integer;
 
-hh:integer;
+//hh:integer;
 begin
 //iBufArrCount:=1;
 //hh:= length(countsStrikeArr[iBufArrCount]);
@@ -66,27 +66,31 @@ begin
 iBufArrCount:=1;
 while iBufArrCount<=FILE_NUM do
   begin
-    //разбор файла поэлементно
-    fileBufCount:=0;
-    while fileBufCount<=numValInFfileBufer-1 do   //!!!
+    //проверяем подключен ли канал, если нет то и не проверяем его, там нули
+    if (arrEnableSensors[iBufArrCount]) then
       begin
-        //проверяем в какой интервал элемент вошел
-        inlCount:=0;
-        while inlCount<=length(countsStrikeArr[iBufArrCount])-1 do
+        //разбор файла поэлементно
+        fileBufCount:=0;
+        while fileBufCount<=numValInFfileBufer-1 do   //!!!
           begin
-            //проверяем, от левого края интервала до правого
-            if ((arrOfFastProcArray[iBufArrCount][fileBufCount]>=
-                countsStrikeArr[iBufArrCount][inlCount].interval)and
-                (arrOfFastProcArray[iBufArrCount][fileBufCount]<
-                countsStrikeArr[iBufArrCount][inlCount+1].interval)) then
+            //проверяем в какой интервал элемент вошел
+            inlCount:=0;
+            while inlCount<=length(countsStrikeArr[iBufArrCount])-1 do
               begin
-                //нашли попадание. учил и вышли из цикла поиска
-                inc(countsStrikeArr[iBufArrCount][inlCount].countStrike);
-                break;
+                //проверяем, от левого края интервала до правого
+                if ((arrOfFastProcArray[iBufArrCount][fileBufCount]>=
+                      countsStrikeArr[iBufArrCount][inlCount].interval)and
+                    (arrOfFastProcArray[iBufArrCount][fileBufCount]<
+                      countsStrikeArr[iBufArrCount][inlCount+1].interval)) then
+                  begin
+                    //нашли попадание. учил и вышли из цикла поиска
+                    inc(countsStrikeArr[iBufArrCount][inlCount].countStrike);
+                    break;
+                  end;
+                inc(inlCount);
               end;
-            inc(inlCount);
+            inc(fileBufCount);
           end;
-         inc(fileBufCount);
       end;
     inc(iBufArrCount);
   end;
@@ -112,27 +116,31 @@ begin
 iFile:=1;
 while iFile<=FILE_NUM do
   begin
-    //формируем имя файла
-    fileName:=ExtractFileDir(ParamStr(0))+'\Report\'+'\hist\'+'Канал'+IntToStr(iFile)+'_hist'+'.xls';
-    //связали дял записи
-    AssignFile(filesGistArray[iFile],fileName);
-    //открыли на запись. При повторной записи предидущее содержимое затрется
-    Rewrite(filesGistArray[iFile]);
-
-    //записываем каждый файл в формате интервал колич.попаданий
-    iWriteCount:=0;
-    while iWriteCount<=length(countsStrikeArr[iFile])-1 do
+    //проверяем подключен ли канал, если нет то не создаем файл этого канала
+    if (arrEnableSensors[iFile]) then
       begin
-        //формируем строку на запись
-        writeStr:=FloatToStr(countsStrikeArr[iFile][iWriteCount].interval)+#9+
-          IntToStr(countsStrikeArr[iFile][iWriteCount].countStrike);
-        //запись строки в файл
-        writeLn(filesGistArray[iFile],writeStr);
-        inc(iWriteCount);
+        //формируем имя файла
+        fileName:=ExtractFileDir(ParamStr(0))+'\Report\'+'\hist\'+
+          'Канал'+IntToStr(iFile)+'_hist'+'.xls';
+        //связали дял записи
+        AssignFile(filesGistArray[iFile],fileName);
+        //открыли на запись. При повторной записи предидущее содержимое затрется
+        Rewrite(filesGistArray[iFile]);
+
+        //записываем каждый файл в формате интервал колич.попаданий
+        iWriteCount:=0;
+        while iWriteCount<=length(countsStrikeArr[iFile])-1 do
+          begin
+            //формируем строку на запись
+            writeStr:=FloatToStr(countsStrikeArr[iFile][iWriteCount].interval)+
+              #9+IntToStr(countsStrikeArr[iFile][iWriteCount].countStrike);
+            //запись строки в файл
+            writeLn(filesGistArray[iFile],writeStr);
+            inc(iWriteCount);
+          end;
+        //записали, закрыли
+        CloseFile(filesGistArray[iFile]);
       end;
-    
-    //записали, закрыли
-    CloseFile(filesGistArray[iFile]);
     //переходим на запись следующего файла
     inc(iFile);
   end;
@@ -161,6 +169,8 @@ begin
   //h:=length(SCRUTfileArr);
   //ShowMessage(IntToStr(h));
 
+
+  //РАБОТА ТОЛЬКО С БЫСТРЫМИ
   //Перебираем все найденные в каталоге файлы СКРУТА
   while ind<length(SCRUTfileArr) do
     begin
@@ -175,7 +185,15 @@ begin
           begin
             //заказываем по 1 точке под каждый буфер массив
             SetLength(arrOfFastProcArray[i],k+1);
-            arrOfFastProcArray[i][k]:=pocket[i+2];
+            //проверяе подключен ли канал, если нет заполняем его значения нулями
+            if (arrEnableSensors[i]) then
+              begin
+                arrOfFastProcArray[i][k]:=pocket[i+2];
+              end
+            else
+              begin
+                arrOfFastProcArray[i][k]:=0;
+              end;
             inc(i);
           end;
         finally

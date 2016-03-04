@@ -6,6 +6,7 @@ Classes, SysUtils, Dialogs;
 const
 //количество файлов-гистограмм
 FILE_NUM=24;
+//количество байт в пакете
 POCKETSIZE=28;
 
 type

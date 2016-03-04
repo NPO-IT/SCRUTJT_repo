@@ -1,8 +1,8 @@
 object Form1: TForm1
-  Left = 122
-  Top = 462
+  Left = 187
+  Top = 487
   Width = 1549
-  Height = 882
+  Height = 877
   Caption = 'IRUTPlayer'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -24,7 +24,7 @@ object Form1: TForm1
   object Splitter1: TSplitter
     Left = 0
     Top = 0
-    Height = 844
+    Height = 839
   end
   object Panel1: TPanel
     Left = 0
@@ -201,7 +201,7 @@ object Form1: TForm1
     BottomAxis.Automatic = False
     BottomAxis.AutomaticMaximum = False
     BottomAxis.AutomaticMinimum = False
-    BottomAxis.Maximum = 20.000000000000000000
+    BottomAxis.Maximum = 24.000000000000000000
     BottomAxis.Minimum = 1.000000000000000000
     LeftAxis.Automatic = False
     LeftAxis.AutomaticMaximum = False

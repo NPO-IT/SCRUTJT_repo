@@ -533,7 +533,7 @@ while iB<=POCKETSIZE-2 do
         // канал не подлючен выводим нули
         form1.Chart1.Series[0].AddXY(iB-2,0);
       end;
-
+    //form1.Memo1.Lines.Add(intToStr(iB-2));
 
 
     //Вывод выбранного значения байта на гистограмму

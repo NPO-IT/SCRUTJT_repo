@@ -5,9 +5,9 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, xpman, ExtCtrls, StdCtrls, Series, TeEngine, TeeProcs, Chart,
-  ComCtrls,DateUtils, Math, FileCtrl, Unit2, IniFiles;
+  ComCtrls,DateUtils, Math, FileCtrl, Unit2, IniFiles, WriteGistUnit;
 const
-POCKETSIZE=28;//размер пакета СКРУТЖТ
+
 //TRACK_SIZE_KOEF=224;//коэф. масштабирования для ТрекБара
 RTPOCKETNUM=31;// количество обр. пакетов за 10 мс таймера в реалтайме
 MAXNUMINDOUBLE=1.79E25;
@@ -88,7 +88,7 @@ type
   TIntArr=array [1..MAX_POINT_IN_SPECTR] of integer;
 var
   Form1: TForm1;
-
+  
   fileSCRUTJT:file;
   stream: TFileStream;
   iGist:integer;
@@ -145,14 +145,30 @@ var
   spArrayIn:TByteArr;
    //выходной массив спектра
   spArrayOut:TIntArr;
+
+  //граница быстрых начало
+  fastProcBegLimit:real;
+  fastProcEndLimit:real;
+  //интервал обработки быстрых
+  fastInterval:real;
+  //длительность обр. интервала
+  intervalSize:integer;
+  //частота опроса быстрых
+  poolFastFreq:integer;
+  poolFastVal:integer;
+
+  //количество подинтервалов
+  countInterval:integer;
+
 procedure openFileForIndex(ind:integer);
 function TestTime(time:string):boolean; //объявление для возможности запуска из др. юнита
 procedure WriteInterval(numF:integer;offsetF:int64;timeBegStr:string;timeEndStr:string);
 procedure WriteIntervalMax(numF:integer;offsetF:int64;
   timeBegStr:string;timeEndStr:string;unInterval:integer);
 implementation
-
-uses Unit3;
+const
+POCKETSIZE=28;//размер пакета ИРУТ
+//uses Unit3;
 {$R *.dfm}
 //Процедура задержки
 //==============================================================================
@@ -242,9 +258,17 @@ end;
 //==============================================================================
 //Работа с файлом конфигурации. Вынимаем параметры для работы ПО
 //==============================================================================
-procedure WorkWithConfig(confPath:string);
+procedure WriteConfParam(confPath:string);
 begin
 confIni:=TiniFile.Create(confPath);
+//заполнение параметров из конф. файла
+fastProcBegLimit:=confIni.readFloat('Быстрые общие параметры', 'Граница гистограммы обработки от', 0.0);
+fastProcEndLimit:=confIni.readFloat('Быстрые общие параметры', 'Граница гистограммы обработки до', 0.0);
+fastInterval:=confIni.readFloat('Быстрые общие параметры', 'Интервал гистограммы обработки',0.0);
+intervalSize:=confIni.readInteger('Общие параметры', 'Длительность обр. интервала',0);
+poolFastFreq:=confIni.readInteger('Быстрые общие параметры', 'Частота дискретизации',0);
+//запишем длительонсть обр. интервала в количестве точек
+poolFastVal:=poolFastFreq*intervalSize;
 confIni.Free;
 end;
 //==============================================================================
@@ -487,7 +511,7 @@ begin
     //освободили предидущий открытый рабочий файл СКРУТЖТ
     //stream.Free;
 
-    stream:=TFileStream.Create(SCRUTfileArr[ind].path,fmOpenRead);
+    stream:=TFileStream.Create(SCRUTfileArr[ind].path,fmShareDenyNone{fmOpenRead});
   //end
 //else
  // begin
@@ -800,7 +824,7 @@ strInUnixTime:=DateTimeToUnix(strInDateTime);
 
 //fileStream.free;
 //открыли файл на чтение
-fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmOpenRead);
+fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmShareDenyNone{fmOpenRead});
 
 while (not rezBool) do
   begin
@@ -905,7 +929,7 @@ while (not rezBool) do
                           //освободили старый файл
                           fileStream.Free;
                           //подключили нужный
-                          fileStream:=TFileStream.Create(SCRUTfileArr[iByteAcum].path,fmOpenRead);
+                          fileStream:=TFileStream.Create(SCRUTfileArr[iByteAcum].path,fmShareDenyNone{fmOpenRead});
                           //находим смещение в байтах до нужного нам файла
 
                           deltaPrevF:=0;
@@ -958,7 +982,7 @@ while (not rezBool) do
               fileStream.Free;
               //wait(5);
               inc(fileInd);
-              fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmOpenRead);
+              fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmShareDenyNone{fmOpenRead});
             end
           else
             begin
@@ -1009,7 +1033,7 @@ strInUnixTimeDelta:int64;
 begin
 fileInd:=numF;
 //открываем переданный файл
-fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmOpenRead);
+fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmShareDenyNone{fmOpenRead});
 //задаем смещение от начала
 fileStream.Position:=offsetF;
 //для сбора времени
@@ -1120,7 +1144,7 @@ while (not finish) do
               fileStream.Free;
               //wait(5);
               inc(fileInd);
-              fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmOpenRead);
+              fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmShareDenyNone{fmOpenRead});
             end
           else
             begin
@@ -1177,7 +1201,7 @@ iunIntervByte:int64;
 begin
 fileInd:=numF;
 //открываем переданный файл
-fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmOpenRead);
+fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmShareDenyNone{fmOpenRead});
 //задаем смещение от начала
 fileStream.Position:=offsetF;
 //для сбора времени
@@ -1190,8 +1214,8 @@ finish:=false;
 strInUnixTimeDelta:=trunc((DateTimeToUnix(StrToDateTime(timeEndStr))-
   DateTimeToUnix(StrToDateTime(timeBegStr)))*BYTEINSEC/POCKETSIZE);
 
-form3.ProgressBar1.Min:=0;
-form3.ProgressBar1.Max:=strInUnixTimeDelta-1;
+//form3.ProgressBar1.Min:=0;
+//form3.ProgressBar1.Max:=strInUnixTimeDelta-1;
 
 //инициализируем массив маскимумов нулями.
 for iMax:=1 to POCKETSIZE-4 do
@@ -1273,7 +1297,7 @@ while (not finish) do
           iunIntervByte:=0;
         end;
       
-      form3.ProgressBar1.Position:=form3.ProgressBar1.Position+1;
+      //form3.ProgressBar1.Position:=form3.ProgressBar1.Position+1;
 
       if ((countS_T-cT+1) mod 2000 =0) then
         begin
@@ -1326,7 +1350,7 @@ while (not finish) do
               fileStream.Free;
               //wait(5);
               inc(fileInd);
-              fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmOpenRead);
+              fileStream:=TFileStream.Create(SCRUTfileArr[fileInd].path,fmShareDenyNone{fmOpenRead});
             end
           else
             begin
@@ -1403,7 +1427,7 @@ if SelectDirectory('Выберите каталог в котором лежат файлы-записи СКРУТЖТ','\', 
                 form1.OpenDialog1.InitialDir := GetCurrentDir;
                 //фильтр на выбор только типа ини
                 form1.OpenDialog1.Filter :='INI|*.ini';
-                WorkWithConfig(form1.OpenDialog1.FileName);
+                WriteConfParam(form1.OpenDialog1.FileName);
                 break;
               end
             else
@@ -1574,7 +1598,33 @@ form1.Timer1.Enabled:=true;
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
+var
+i:real;
+iFile:integer;
 begin
+//перед разбором проинициализируем структуру для подсчета попаданий в подинтервалы
+iFile:=1;
+while iFile<=FILE_NUM do
+  begin
+    //посчитаем количество подинтервалов(интервалов)
+    i:=fastProcBegLimit;
+    countInterval:=0;
+    while i<=fastProcEndLimit do
+      begin
+        //иниц. массив подинтервалов и заполняем их
+        SetLength(countsStrikeArr[iFile],countInterval+1);
+        countsStrikeArr[iFile][countInterval].interval:=i;
+        i:=i+fastInterval;
+        inc(countInterval);
+      end;
+    //на последнем шаге лишний счет.
+    dec(countInterval);
+    inc(iFile);
+  end;
+
+thWriteGist:=TThreadWrite.Create(False);
+thWriteGist.Priority:=tpNormal;
+
 
 {//запись файла мгновенных значений
 //перед каждой записью обнуляем вспомогательный массив и его счетчик

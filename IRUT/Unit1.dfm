@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 187
-  Top = 487
+  Left = 281
+  Top = 111
   Width = 1549
   Height = 877
   Caption = 'IRUTPlayer'
@@ -203,6 +203,8 @@ object Form1: TForm1
     BottomAxis.AutomaticMinimum = False
     BottomAxis.Maximum = 24.000000000000000000
     BottomAxis.Minimum = 1.000000000000000000
+    BottomAxis.StartPosition = 2.000000000000000000
+    BottomAxis.EndPosition = 98.000000000000000000
     LeftAxis.Automatic = False
     LeftAxis.AutomaticMaximum = False
     LeftAxis.AutomaticMinimum = False

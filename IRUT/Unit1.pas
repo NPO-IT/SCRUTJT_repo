@@ -363,6 +363,7 @@ timeGeosArr[skT]:=pocketSCRUTJT[iB];
 timeGeosArr[skT+1]:=pocketSCRUTJT[iB+1];
 skT:=skT+2;
 cT:=cT+1;
+//проверяем не собрали ли 8 байтовое значение времени ГЕОС
 if skT=9 then
   begin
     //сбрасываем счетчик байтов времени от 1..8
@@ -543,7 +544,8 @@ while iB<=POCKETSIZE-2 do
         if iB=chanelIndex+3 then
           begin
             //проверяем подключен ли выводимый на гист. канал
-            if (arrEnableSensors[iB]) then
+            //-2 т.к в массиве подкл. каналов 1 канал в 1 элементе. а в пакете он 3
+            if (arrEnableSensors[iB-2]) then
               begin
                 form1.Chart2.Series[0].AddXY(iGist,pocketSCRUTJT[iB]);
                 inc(iGist);
@@ -595,6 +597,7 @@ function WriteSpArr(var spArray:TByteArr;iB:integer;countWritePoint:integer):int
 begin
 //while iB<=POCKETSIZE-2 do
   //begin
+    //pocketSCRUTJT[iB]:=111;
     spArray[countWritePoint]:=pocketSCRUTJT[iB];
     inc(iB);
     inc(countWritePoint);
@@ -685,7 +688,7 @@ begin
 form1.spectrDia.Series[0].Clear;
 for i:=1 to round(length(spArrayOut)/2) do
   begin
-    form1.spectrDia.Series[0].AddXY(i-1,spArrayOut[i]);
+    form1.spectrDia.Series[0].AddXY((i-1)*round(poolFastFreq/MAX_POINT_IN_SPECTR),spArrayOut[i]);
   end;
 
 end;
@@ -736,7 +739,7 @@ while i<=numberOfPocket do
         begin
           form1.Memo1.Lines.Add('1');
         end;}
-
+      //form1.Memo1.Lines.Add(IntToStr(length(spArrayIn)));
       //заполняем массив для выч. спектра. c 3 байта
       countPointInSpArr:=WriteSpArr(spArrayIn,iByte-(POCKETSIZE-4),countPointInSpArr);
 
@@ -1461,7 +1464,7 @@ if SelectDirectory('Выберите каталог в котором лежат файлы-записи СКРУТЖТ','\', 
         trackSizeKoef:=trunc({allRecordSize}stream.Size/POCKETSIZE/400000)+1;
         //масштабируем Трекбар
         form1.TrackBar1.Max:=trunc(stream.Size{allRecordSize}/POCKETSIZE/trackSizeKoef);
-        
+
         //pocketCount:=1;
         //доступность кнопки старта для работы дальше
         form1.StartButton.Enabled:=true;
@@ -1530,7 +1533,6 @@ form1.StopButton.Enabled:=true;
 
 
 
-
 //начало разбора
 form1.Timer1.Enabled:=true;
 end;
@@ -1544,6 +1546,7 @@ form1.Timer1.Enabled:=false;
 //iGist:=0;
 //очищием вывод
 //form1.Chart2.Series[0].Clear;
+//thWriteGist.Suspend;
 end;
 
 procedure TForm1.Series1Click(Sender: TChartSeries; ValueIndex: Integer;

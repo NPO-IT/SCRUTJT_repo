@@ -56,11 +56,13 @@ iBufArrCount:integer;
 fileBufCount:integer;
 inlCount:integer;
 
-//hh:integer;
+hh:integer;
 begin
 //iBufArrCount:=1;
 //hh:= length(countsStrikeArr[iBufArrCount]);
 //form1.Memo1.Lines.Add(intToStr(hh));
+//form1.Memo1.Lines.Add(FloatToStr(countsStrikeArr[1][hh].interval));
+//form1.Memo1.Lines.Add(FloatToStr(countsStrikeArr[1][hh-1].interval));
 
 //разбираем пофайлово
 iBufArrCount:=1;
@@ -85,6 +87,12 @@ while iBufArrCount<=FILE_NUM do
                   begin
                     //нашли попадание. учил и вышли из цикла поиска
                     inc(countsStrikeArr[iBufArrCount][inlCount].countStrike);
+                   // form1.Memo1.Lines.Add(
+                    //intToStr(fileBufCount)+'  '+
+                    //intToStr(arrOfFastProcArray[iBufArrCount][fileBufCount])+'  '+
+                   // floatToStr(countsStrikeArr[iBufArrCount][inlCount].interval)+
+                    //'  '+intToStr(countsStrikeArr[iBufArrCount][inlCount].countStrike)
+                   // );
                     break;
                   end;
                 inc(inlCount);
@@ -158,7 +166,7 @@ ind:integer;
 i:integer;
 //счетчик обработанных пакетов
 k:integer;
-
+mmm:integer;
 //h:integer;
 begin
   ind:=0;
@@ -237,11 +245,16 @@ begin
         inc(k);
 
         //проверяем не собрали ли нужное количество точек равное чиатоте дискретизации быстр.
+        //т.к нумерация точек с 0
         if k=poolFastVal then
           begin
             //собрали количество точек соглавсно частоте дискретизации
             //передаем количество значений в каждом буфере файла быстрого процесса
             //считаем исходя из размерности 1 файла,т.к все файлы равны
+
+            //mmm:=length(arrOfFastProcArray[1]);
+            //form1.Memo1.Lines.Add(intToStr(mmm));
+
             ParseFileBuffer(length(arrOfFastProcArray[1]));
 
             WriteHistFiles;
